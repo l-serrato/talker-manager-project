@@ -9,7 +9,7 @@ app.use(express.json());
 const HTTP_OK_STATUS = 200;
 const PORT = process.env.PORT || '3001';
 
-app.get('/talker', authentication, async (req, res) => {
+app.get('/talker', async (req, res) => {
   const talkers = await talkerMng.getAllTalkers();
   res.status(200).json(talkers);
 });
@@ -21,21 +21,29 @@ app.get('/talker/:id', async (req, res) => {
   res.status(200).json(talker);
 });
 
+app.post('/talker', authentication, async (req, res) => {
+  const talkers = await talkerMng.getAllTalkers();
+  const newPerson = { ...req.body };
+  talkers.push(newPerson);
+
+  res.status(201).json({ message: 'Pessoa cadastrada com sucesso!' });
+});
+
 app.post('/login', (req, res) => {
   const { email, password } = req.body;
-  const emailRegex = /^[a-z0-9.]+@[a-z0-9]+\.[a-z]+\.([a-z]+)?$/i;
+  const emailRegex = /\S+@\S+\.\S+/;
 
   if (!email) {
-    res.status(400).json({ message: 'O campo "email" é obrigatório' });
+    return res.status(400).json({ message: 'O campo "email" é obrigatório' });
   }
   if (!password) {
-    res.status(400).json({ message: 'O campo "password" é obrigatório' });
+    return res.status(400).json({ message: 'O campo "password" é obrigatório' });
   }
   if (password.length < 6) {
-    res.status(400).json({ message: 'O "password" deve ter pelo menos 6 caracteres' });
+    return res.status(400).json({ message: 'O "password" deve ter pelo menos 6 caracteres' });
   }
   if (!emailRegex.test(email)) {
-    res.status(400).json({ message: 'O "email" deve ter o formato "email@email.com"' });
+    return res.status(400).json({ message: 'O "email" deve ter o formato "email@email.com"' });
   }
   
   const token = generateToken();
