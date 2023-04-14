@@ -18,11 +18,10 @@ const update = (person, id) => conn.execute(
 
 const remove = (id) => conn.execute('DELETE FROM talkers WHERE id = ?', [id]);
 
-
 module.exports = {
   insert,
   findAll,
   findById,
   update,
-  remove
+  remove,
 };
