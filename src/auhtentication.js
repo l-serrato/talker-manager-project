@@ -1,4 +1,4 @@
-module.exports = (req, res, next) => {
+module.exports = (req, res, _next) => {
   const { authorization } = req.headers;
 
   if (!authorization || authorization.length !== 16) {
