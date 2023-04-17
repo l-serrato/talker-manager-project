@@ -53,8 +53,7 @@ const updateTalkers = async (id, update) => {
 
 const searchTalker = async (query) => {
   const talkerMng = await readTalkers();
-  return talkerMng.talkers
-    .filter((talker) => talker.name.includes(query));
+  return talkerMng.filter((talker) => talker.name.includes(query));
 };
 
 module.exports = {

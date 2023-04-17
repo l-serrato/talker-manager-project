@@ -20,9 +20,13 @@ app.get('/talker', async (req, res) => {
 });
 
 app.get('/talker/search', authentication, async (req, res) => {
-  const { name } = req.query;
-  const talker = await talkerMng.searchTalker(name);
-  res.status(talker.length === 0 ? 404 : 200).json(talker);
+  const { q } = req.query;
+  const talkers = await talkerMng.getAllTalkers();
+  const talker = await talkerMng.searchTalker(q);
+  if (talker.length === 0) {
+    return res.status(200).json(talkers);
+  }
+  return res.status(200).json(talker);
 });
 
 app.get('/talker/:id', async (req, res) => {
@@ -61,20 +65,13 @@ catch {
 }
 }); */
 
-app.delete('/talker/:id',
-authentication,
-validationName,
-validationAge,
-validationTalk,
-validationRate,
-validationWatchedAt,
-async (req, res) => {
+app.delete('/talker/:id', authentication, async (req, res) => {
   const talkers = await talkerMng.getAllTalkers();
   const id = Number(req.params.id);
   const talker = talkers.find((t) => t.id === id);
     const index = talkers.indexOf(talker);
     talkers.splice(index, 1);
-  res.sendStatus(204);
+  return res.sendStatus(204);
 });
 
 app.post('/login', (req, res) => {
