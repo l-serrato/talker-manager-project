@@ -2,6 +2,11 @@ const express = require('express');
 const talkerMng = require('./talkerMng');
 const authentication = require('./auhtentication');
 const generateToken = require('./generateToken');
+const validationName = require('./validationName');
+const validationAge = require('./validationAge');
+const validationTalk = require('./validationTalk');
+const validationRate = require('./validationRate');
+const validationWatchedAt = require('./validationWatchedAt');
 
 const app = express();
 app.use(express.json());
@@ -14,6 +19,12 @@ app.get('/talker', async (req, res) => {
   res.status(200).json(talkers);
 });
 
+app.get('/talker/search', authentication, async (req, res) => {
+  const { name } = req.query;
+  const talker = await talkerMng.searchTalker(name);
+  res.status(talker.length === 0 ? 404 : 200).json(talker);
+});
+
 app.get('/talker/:id', async (req, res) => {
   const { id } = req.params;
   const talker = await talkerMng.getTalkersById(Number(id));
@@ -21,12 +32,49 @@ app.get('/talker/:id', async (req, res) => {
   res.status(200).json(talker);
 });
 
-app.post('/talker', authentication, async (req, res) => {
+app.post('/talker',
+authentication,
+validationName,
+validationAge,
+validationTalk,
+validationRate,
+validationWatchedAt,
+async (req, res) => {
   const talkers = await talkerMng.getAllTalkers();
-  const newPerson = { ...req.body };
-  talkers.push(newPerson);
+  const newPerson = { id: talkers.length + 1, ...req.body };
+talkers.push(newPerson);
+// const newArray = [...talkers, newPerson];
+await talkerMng.writeTalkerFile(talkers);
+return res.status(201).json(newPerson);
+});
 
-  res.status(201).json({ message: 'Pessoa cadastrada com sucesso!' });
+/* app.put('/talker', authentication, validationName, validationAge, validationTalk, validationRate, validationWatchedAt, async (req, res) => {
+  try {
+  const { id } = req.params;
+  const { name, age, talk } = req.body;
+  const updatedTalkers = await talkerMng.updateTalkers({ id, name, age, talk }); 
+
+  if (updatedTalkers) return res.status(200).json({ talker: updatedTalkers });
+}
+catch {
+  res.status(404).json({ message: 'Pessoa palestrante não encontrada' });
+}
+}); */
+
+app.delete('/talker/:id',
+authentication,
+validationName,
+validationAge,
+validationTalk,
+validationRate,
+validationWatchedAt,
+async (req, res) => {
+  const talkers = await talkerMng.getAllTalkers();
+  const id = Number(req.params.id);
+  const talker = talkers.find((t) => t.id === id);
+    const index = talkers.indexOf(talker);
+    talkers.splice(index, 1);
+  res.sendStatus(204);
 });
 
 app.post('/login', (req, res) => {
