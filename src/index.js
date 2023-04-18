@@ -66,11 +66,11 @@ catch {
 }); */
 
 app.delete('/talker/:id', authentication, async (req, res) => {
+  const { id } = req.params;
   const talkers = await talkerMng.getAllTalkers();
-  const id = Number(req.params.id);
-  const talker = talkers.find((t) => t.id === id);
-    const index = talkers.indexOf(talker);
-    talkers.splice(index, 1);
+  const pplFiltered = talkers.filter((e) => e.id !== Number(id));
+  const updatedPpl = JSON.stringify(pplFiltered);
+  await talkerMng.writeTalkerFile(updatedPpl);
   return res.sendStatus(204);
 });
 
